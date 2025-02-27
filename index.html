@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Email Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input[type="email"] {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #6e8efb;
+            box-shadow: 0 2px 10px rgba(110, 142, 251, 0.3);
+        }
+
+        button.generate-btn {
+            width: 100%;
+            padding: 0.9rem;
+            background: #6e8efb;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(110, 142, 251, 0.4);
+        }
+
+        button.generate-btn:hover {
+            background: #5d7ce0;
+            box-shadow: 0 6px 20px rgba(110, 142, 251, 0.6);
+        }
+
+        .results {
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .email-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .email-text {
+            flex-grow: 1;
+            color: #333;
+            word-break: break-all;
+            margin-right: 1rem;
+        }
+
+        button.copy-btn {
+            padding: 0.5rem 1rem;
+            background: #28a745;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        button.copy-btn:hover {
+            background: #218838;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.5);
+        }
+
+        button.copy-btn.copied {
+            background: #17a2b8;
+            box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
+        }
+
+        .error {
+            color: #dc3545;
+            margin-top: 0.5rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Advanced Email Generator</h1>
+        <form id="emailForm" onsubmit="generateEmails(event)">
+            <div class="form-group">
+                <label for="userEmail">Enter Your Primary Email</label>
+                <input type="email" id="userEmail" placeholder="example@domain.com" required>
+                <div class="error" id="emailError">Please enter a valid email address</div>
+            </div>
+            <button type="submit" class="generate-btn">Generate Email Variations</button>
+        </form>
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email.toLowerCase());
+        }
+
+        function generateEmails(event) {
+            event.preventDefault();
+            const userEmail = document.getElementById('userEmail').value;
+            const errorDiv = document.getElementById('emailError');
+            const resultsDiv = document.getElementById('results');
+
+            if (!validateEmail(userEmail)) {
+                errorDiv.style.display = 'block';
+                resultsDiv.classList.remove('show');
+                return;
+            }
+
+            errorDiv.style.display = 'none';
+            const [username, domain] = userEmail.split('@');
+            const domainParts = domain.split('.');
+            const baseDomain = domainParts.slice(-2).join('.');
+
+            const variations = [
+                // Dot variation
+                `${username.split('').join('.')}@${domain}`,
+                // Plus variation
+                `${username}+variant@${domain}`,
+                // Subdomain variation
+                `${username}@mail.${domain}`,
+                // Number variation
+                `${username}1@${domain}`,
+                // Prefix variation
+                `my.${username}@${domain}`,
+                // Suffix variation
+                `${username}.extra@${domain}`
+            ];
+
+            if (domain === 'gmail.com') {
+                variations.push(`${username}@googlemail.com`);
+            }
+
+            let html = '';
+            variations.forEach(email => {
+                html += `
+                    <div class="email-item">
+                        <div class="email-text">${email}</div>
+                        <button class="copy-btn" onclick="copyToClipboard('${email}', this)">Copy</button>
+                    </div>
+                `;
+            });
+
+            resultsDiv.innerHTML = html;
+            resultsDiv.classList.add('show');
+        }
+
+        function copyToClipboard(text, button) {
+            navigator.clipboard.writeText(text).then(() => {
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
